@@ -15,5 +15,8 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
+# Environment variables will be set by Cloud Run
+# Make sure GOOGLE_API_KEY, AI_PROVIDER, AI_MODEL are set in Cloud Run
+
 # Command to run the FastAPI app with Uvicorn
 CMD ["uvicorn", "backend_api:app", "--host", "0.0.0.0", "--port", "8080"]

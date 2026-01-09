@@ -1,0 +1,56 @@
+# Environment variables and secrets
+.env
+.env.deploy
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# Personal data (optional - uncomment if you want to exclude)
+# me/resume_for_Virtual_Assistant.pdf
+# me/summary.txt
+
+# Test outputs
+test_results/
+performance_data/
+
+# Cloud deployment artifacts
+*.json
+!package.json
+deployment_configs/

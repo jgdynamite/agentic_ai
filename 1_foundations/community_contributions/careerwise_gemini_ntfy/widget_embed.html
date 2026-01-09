@@ -1,0 +1,342 @@
+<!-- CareerWise Chatbot Widget - Embed Code -->
+<!-- Copy this entire code block and paste it before </body> in your HTML -->
+
+<div id="careerwise-chatbot-widget"></div>
+
+<script>
+(function() {
+    // Configuration - UPDATE THIS WITH YOUR DEPLOYED URL
+    const API_URL = 'https://careerwise-chatbot-ftzbbbgsba-uc.a.run.app/chat';
+    
+    // Widget Styles
+    const widgetStyles = `
+        #careerwise-chatbot-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        #careerwise-chat-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        #careerwise-chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        #careerwise-chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 380px;
+            height: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #careerwise-chat-window.active {
+            display: flex;
+        }
+        #careerwise-chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #careerwise-chat-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        #careerwise-chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            line-height: 1;
+        }
+        #careerwise-chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+        .careerwise-message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .careerwise-message.user {
+            justify-content: flex-end;
+        }
+        .careerwise-message.bot {
+            justify-content: flex-start;
+        }
+        .careerwise-message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        .careerwise-message.user .careerwise-message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .careerwise-message.bot .careerwise-message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        #careerwise-typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e0e0e0;
+            width: fit-content;
+            margin-bottom: 15px;
+        }
+        #careerwise-typing-indicator.active {
+            display: block;
+        }
+        .careerwise-typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        .careerwise-typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #999;
+            animation: typing 1.4s infinite;
+        }
+        .careerwise-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .careerwise-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+            30% { transform: translateY(-8px); opacity: 1; }
+        }
+        #careerwise-chat-input-area {
+            padding: 16px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+            display: flex;
+            gap: 10px;
+        }
+        #careerwise-chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        #careerwise-chat-input:focus {
+            border-color: #667eea;
+        }
+        #careerwise-chat-send {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.2s;
+        }
+        #careerwise-chat-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        #careerwise-chat-send:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        @media (max-width: 768px) {
+            #careerwise-chat-window {
+                width: 100%;
+                height: 100%;
+                bottom: 0;
+                right: 0;
+                border-radius: 0;
+            }
+            #careerwise-chat-button {
+                bottom: 15px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+        }
+        #careerwise-chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        #careerwise-chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        #careerwise-chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+    `;
+    
+    // Inject styles
+    const styleSheet = document.createElement("style");
+    styleSheet.textContent = widgetStyles;
+    document.head.appendChild(styleSheet);
+    
+    // Widget HTML
+    const widgetHTML = `
+        <button id="careerwise-chat-button" aria-label="Open chat">💬</button>
+        <div id="careerwise-chat-window">
+            <div id="careerwise-chat-header">
+                <h3>🤖 CareerWise Assistant</h3>
+                <button id="careerwise-chat-close" aria-label="Close chat">×</button>
+            </div>
+            <div id="careerwise-chat-messages">
+                <div class="careerwise-message bot">
+                    <div class="careerwise-message-content">
+                        Hello! I'm here to answer questions about my career, skills, and experience. How can I help you?
+                    </div>
+                </div>
+            </div>
+            <div id="careerwise-typing-indicator">
+                <div class="careerwise-typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+            <div id="careerwise-chat-input-area">
+                <input type="text" id="careerwise-chat-input" placeholder="Type your message...">
+                <button id="careerwise-chat-send">Send</button>
+            </div>
+        </div>
+    `;
+    
+    // Insert widget
+    const widgetContainer = document.getElementById('careerwise-chatbot-widget');
+    widgetContainer.innerHTML = widgetHTML;
+    
+    // Widget functionality
+    let messageHistory = [];
+    const chatButton = document.getElementById('careerwise-chat-button');
+    const chatWindow = document.getElementById('careerwise-chat-window');
+    const closeButton = document.getElementById('careerwise-chat-close');
+    const messagesDiv = document.getElementById('careerwise-chat-messages');
+    const chatInput = document.getElementById('careerwise-chat-input');
+    const sendButton = document.getElementById('careerwise-chat-send');
+    const typingIndicator = document.getElementById('careerwise-typing-indicator');
+    
+    // Toggle chat window
+    chatButton.addEventListener('click', () => {
+        chatWindow.classList.toggle('active');
+        if (chatWindow.classList.contains('active')) {
+            chatInput.focus();
+        }
+    });
+    
+    closeButton.addEventListener('click', () => {
+        chatWindow.classList.remove('active');
+    });
+    
+    // Send message
+    async function sendMessage() {
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        addMessage(message, 'user');
+        chatInput.value = '';
+        sendButton.disabled = true;
+        typingIndicator.classList.add('active');
+        scrollToBottom();
+        
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: message,
+                    history: messageHistory
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            typingIndicator.classList.remove('active');
+            
+            if (data.error) {
+                addMessage(data.error, 'bot');
+            } else if (data.response) {
+                addMessage(data.response, 'bot');
+                messageHistory.push(
+                    { role: 'user', content: message },
+                    { role: 'assistant', content: data.response }
+                );
+            }
+        } catch (error) {
+            typingIndicator.classList.remove('active');
+            addMessage('Sorry, I encountered an error. Please try again later.', 'bot');
+            console.error('Chatbot error:', error);
+        }
+        
+        sendButton.disabled = false;
+        chatInput.focus();
+    }
+    
+    function addMessage(text, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `careerwise-message ${sender}`;
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'careerwise-message-content';
+        contentDiv.textContent = text;
+        messageDiv.appendChild(contentDiv);
+        messagesDiv.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    function scrollToBottom() {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    
+    // Enter key to send
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+    
+    sendButton.addEventListener('click', sendMessage);
+})();
+</script>

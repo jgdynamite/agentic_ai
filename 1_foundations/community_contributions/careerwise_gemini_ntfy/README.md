@@ -4,10 +4,10 @@
 
 | Technology       | Status                             |
 | :--------------- | :--------------------------------- |
-| **AI Model**     | Google Gemini (Free Models)        |
+| **AI Model**     | Google Gemini (default), Local Models, or Akamai Inference |
 | **Notifications**| ntfy (Open-Source, No API Key)     |
-| **Architecture** | API-First (Python/Flask/FastAPI)   |
-| **Deployment**   | Google Cloud Run (Nearly Free)     |
+| **Architecture** | API-First (Python/FastAPI)        |
+| **Deployment**   | Google Cloud Run, AWS, Akamai, or Local |
 
 ---
 
@@ -24,9 +24,14 @@ This project is an ideal solution for developers or students looking to showcase
 
 ## ✨ Key Features
 
-### 🧠 Gemini-Powered Guidance
+### 🧠 AI-Powered Guidance
 
-Leverages **Google Gemini Free Models** to generate personalized and helpful career advice:
+Uses **flexible AI providers** to generate personalized and helpful career advice:
+- **Google Gemini** (default) - Free tier available
+- **Local Models** - Ollama, LM Studio, vLLM (100% private, no API costs)
+- **Akamai Inference** - Edge-optimized AI inference
+
+See [AI_PROVIDER_GUIDE.md](AI_PROVIDER_GUIDE.md) for setup instructions.
 
 - Career answers
 - Resume feedback
@@ -75,11 +80,37 @@ cd agents/1_foundations/community_contributions/careerwise_gemini_notify
 pip install -r requirements.txt
 ```
 
-### 3. Configure Gemini & ntfy
+### 3. Configure AI Provider & ntfy
 
-#### Gemini
-Add your Gemini API key in:
-- `gemini_chatbot.py`
+#### AI Provider
+Choose your AI provider and set environment variables:
+
+**Option 1: Google Gemini (default)**
+```bash
+export AI_PROVIDER=gemini
+export GOOGLE_API_KEY=your-gemini-api-key
+```
+
+**Option 2: Local Model (Ollama)**
+```bash
+# Install Ollama: https://ollama.ai
+ollama pull llama3.2
+ollama serve
+
+export AI_PROVIDER=local
+export LOCAL_AI_BASE_URL=http://localhost:11434/v1
+export AI_MODEL=llama3.2
+```
+
+**Option 3: Akamai Inference**
+```bash
+export AI_PROVIDER=akamai
+export AKAMAI_INFERENCE_API_KEY=your-key
+export AKAMAI_INFERENCE_BASE_URL=https://your-endpoint.com/v1
+export AI_MODEL=your-model
+```
+
+See [AI_PROVIDER_GUIDE.md](AI_PROVIDER_GUIDE.md) for detailed instructions.
 
 #### ntfy
 - Open the ntfy app (Android/iOS/Web)
@@ -183,7 +214,7 @@ fetch("https://chatbot-api-xxxxx.a.run.app", { ... });
 
 This project makes an outstanding portfolio highlight by demonstrating:
 
-- **AI Engineering:** Gemini API integration
+- **AI Engineering:** Flexible AI provider integration (Gemini, Local Models, Akamai)
 - **Backend + Frontend:** Full-stack skills
 - **API Design:** Real-world architecture
 - **Cloud Deployment:** Google Cloud Run
